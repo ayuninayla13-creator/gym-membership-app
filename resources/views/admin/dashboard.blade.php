@@ -270,147 +270,147 @@
     </div>
 </div>
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-    
-        const emptyState = document.getElementById('rfid-empty-state');
-        const checkinData = document.getElementById('rfid-checkin-data');
-    
-        const memberPhoto = document.getElementById('rfid-member-photo');
-        const memberInitial = document.getElementById('rfid-member-initial');
-    
-        const memberName = document.getElementById('rfid-member-name');
-        const memberCode = document.getElementById('rfid-member-code');
-        const memberUid = document.getElementById('rfid-member-uid');
-        const memberTime = document.getElementById('rfid-member-time');
-        const memberDate = document.getElementById('rfid-member-date');
-    
-        const liveIndicator = document.getElementById('rfid-live-indicator');
-        const liveDot = document.getElementById('rfid-live-dot');
-    
-        let lastAttendanceId = null;
-    
-    
-        async function checkLatestRfidCheckin() {
-    
-            try {
-    
-                const response = await fetch(
-                    '{{ route('admin.dashboard.latest-rfid-checkin') }}',
-                    {
-                        headers: {
-                            'Accept': 'application/json'
-                        }
+document.addEventListener('DOMContentLoaded', function () {
+
+    const emptyState = document.getElementById('rfid-empty-state');
+    const checkinData = document.getElementById('rfid-checkin-data');
+
+    const memberPhoto = document.getElementById('rfid-member-photo');
+    const memberInitial = document.getElementById('rfid-member-initial');
+
+    const memberName = document.getElementById('rfid-member-name');
+    const memberCode = document.getElementById('rfid-member-code');
+    const memberUid = document.getElementById('rfid-member-uid');
+    const memberTime = document.getElementById('rfid-member-time');
+    const memberDate = document.getElementById('rfid-member-date');
+
+    const liveIndicator = document.getElementById('rfid-live-indicator');
+    const liveDot = document.getElementById('rfid-live-dot');
+
+    let lastAttendanceId = null;
+
+
+    async function checkLatestRfidCheckin() {
+
+        try {
+
+            const response = await fetch(
+                '{{ route('admin.dashboard.latest-rfid-checkin') }}',
+                {
+                    headers: {
+                        'Accept': 'application/json'
                     }
-                );
-    
-                if (!response.ok) {
-                    throw new Error('Gagal mengambil data check-in.');
                 }
-    
-                const data = await response.json();
-    
-    
-                if (!data.exists) {
-                    return;
-                }
-    
-    
-                // Kalau masih check-in yang sama,
-                // tidak perlu render ulang.
-                if (lastAttendanceId === data.id) {
-                    return;
-                }
-    
-    
-                lastAttendanceId = data.id;
-    
-    
-                // ==========================================
-                // UPDATE DATA MEMBER
-                // ==========================================
-    
-                memberName.textContent = data.name;
-                memberCode.textContent = data.member_code;
-                memberUid.textContent = data.uid;
-                memberTime.textContent = data.time;
-                memberDate.textContent = data.date;
-    
-    
-                // ==========================================
-                // FOTO MEMBER
-                // ==========================================
-    
-                const initial = data.name
-                    ? data.name.charAt(0).toUpperCase()
-                    : '-';
-    
-                memberInitial.textContent = initial;
-    
-    
-                if (data.photo) {
-    
-                    memberPhoto.src = data.photo;
-                    memberPhoto.classList.remove('hidden');
-                    memberInitial.classList.add('hidden');
-    
-                } else {
-    
-                    memberPhoto.src = '';
-                    memberPhoto.classList.add('hidden');
-                    memberInitial.classList.remove('hidden');
-    
-                }
-    
-    
-                // ==========================================
-                // TAMPILKAN DATA
-                // ==========================================
-    
-                emptyState.classList.add('hidden');
-                checkinData.classList.remove('hidden');
-    
-    
-                // ==========================================
-                // INDIKATOR LIVE
-                // ==========================================
-    
-                liveIndicator.classList.remove('text-slate-500');
-                liveIndicator.classList.add('text-volt');
-    
-                liveDot.classList.remove('bg-slate-500');
-                liveDot.classList.add('bg-volt');
-    
-                liveIndicator.lastChild.textContent = ' RFID terdeteksi';
-    
-    
-                // ==========================================
-                // EFEK SAAT KARTU BARU DITAP
-                // ==========================================
-    
-                checkinData.classList.remove('rfid-checkin-pulse');
-    
-                void checkinData.offsetWidth;
-    
-                checkinData.classList.add('rfid-checkin-pulse');
-    
-    
-            } catch (error) {
-    
-                console.error('RFID Dashboard Error:', error);
-    
+            );
+
+            if (!response.ok) {
+                throw new Error('Gagal mengambil data check-in.');
             }
-    
+
+            const data = await response.json();
+
+
+            if (!data.exists) {
+                return;
+            }
+
+
+            // Kalau masih check-in yang sama,
+            // tidak perlu render ulang.
+            if (lastAttendanceId === data.id) {
+                return;
+            }
+
+
+            lastAttendanceId = data.id;
+
+
+            // ==========================================
+            // UPDATE DATA MEMBER
+            // ==========================================
+
+            memberName.textContent = data.name;
+            memberCode.textContent = data.member_code;
+            memberUid.textContent = data.uid;
+            memberTime.textContent = data.time;
+            memberDate.textContent = data.date;
+
+
+            // ==========================================
+            // FOTO MEMBER
+            // ==========================================
+
+            const initial = data.name
+                ? data.name.charAt(0).toUpperCase()
+                : '-';
+
+            memberInitial.textContent = initial;
+
+
+            if (data.photo) {
+
+                memberPhoto.src = data.photo;
+                memberPhoto.classList.remove('hidden');
+                memberInitial.classList.add('hidden');
+
+            } else {
+
+                memberPhoto.src = '';
+                memberPhoto.classList.add('hidden');
+                memberInitial.classList.remove('hidden');
+
+            }
+
+
+            // ==========================================
+            // TAMPILKAN DATA
+            // ==========================================
+
+            emptyState.classList.add('hidden');
+            checkinData.classList.remove('hidden');
+
+
+            // ==========================================
+            // INDIKATOR LIVE
+            // ==========================================
+
+            liveIndicator.classList.remove('text-slate-500');
+            liveIndicator.classList.add('text-volt');
+
+            liveDot.classList.remove('bg-slate-500');
+            liveDot.classList.add('bg-volt');
+
+            liveIndicator.lastChild.textContent = ' RFID terdeteksi';
+
+
+            // ==========================================
+            // EFEK SAAT KARTU BARU DITAP
+            // ==========================================
+
+            checkinData.classList.remove('rfid-checkin-pulse');
+
+            void checkinData.offsetWidth;
+
+            checkinData.classList.add('rfid-checkin-pulse');
+
+
+        } catch (error) {
+
+            console.error('RFID Dashboard Error:', error);
+
         }
-    
-    
-        // Cek setiap 1 detik
-        setInterval(checkLatestRfidCheckin, 1000);
-    
-        // Cek langsung saat dashboard dibuka
-        checkLatestRfidCheckin();
-    
-    });
-    </script>
+
+    }
+
+
+    // Cek setiap 1 detik
+    setInterval(checkLatestRfidCheckin, 1000);
+
+    // Cek langsung saat dashboard dibuka
+    checkLatestRfidCheckin();
+
+});
+</script>
 <script>
     const ctx = document.getElementById('attendanceChart');
     new Chart(ctx, {
