@@ -289,11 +289,7 @@ class DashboardController extends Controller
                 'check_in_at' => now(),
             ]);
 
-            /*
-            |--------------------------------------------------------------------------
-            | Reload relationship
-            |--------------------------------------------------------------------------
-            */
+            
 
             $attendance->load([
                 'member.user',
