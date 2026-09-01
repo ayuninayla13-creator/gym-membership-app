@@ -9,12 +9,19 @@ class Attendance extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['member_id', 'rfid_card_id', 'method', 'check_in_at'];
+    protected $fillable = [
+        'member_id',
+        'rfid_card_id',
+        'method',
+        'check_in_at',
+        'check_out_at',
+    ];
 
     protected function casts(): array
     {
         return [
             'check_in_at' => 'datetime',
+            'check_out_at' => 'datetime',
         ];
     }
 

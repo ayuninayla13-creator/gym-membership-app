@@ -154,9 +154,22 @@
                         <p class="text-[11px] uppercase tracking-wide text-slate-500">
                             Waktu Check-in
                         </p>
-
+                    
                         <p
                             id="rfid-member-time"
+                            class="text-sm text-white font-semibold mt-0.5"
+                        >
+                            -
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <p class="text-[11px] uppercase tracking-wide text-slate-500">
+                            Waktu Check-out
+                        </p>
+                    
+                        <p
+                            id="rfid-member-checkout-time"
                             class="text-sm text-white font-semibold mt-0.5"
                         >
                             -
@@ -175,7 +188,10 @@
 
                     <span class="w-2.5 h-2.5 rounded-full bg-volt"></span>
 
-                    <span class="text-sm font-semibold">
+                    <span
+                        id="rfid-status-text"
+                        class="text-sm font-semibold"
+                    >
                         Check-in berhasil
                     </span>
 
@@ -282,7 +298,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const memberCode = document.getElementById('rfid-member-code');
     const memberUid = document.getElementById('rfid-member-uid');
     const memberTime = document.getElementById('rfid-member-time');
+    const memberCheckoutTime = document.getElementById('rfid-member-checkout-time');
     const memberDate = document.getElementById('rfid-member-date');
+
+    const statusText = document.getElementById('rfid-status-text');
+
 
     const liveIndicator = document.getElementById('rfid-live-indicator');
     const liveDot = document.getElementById('rfid-live-dot');
@@ -333,8 +353,22 @@ document.addEventListener('DOMContentLoaded', function () {
             memberCode.textContent = data.member_code;
             memberUid.textContent = data.uid;
             memberTime.textContent = data.time;
+            memberCheckoutTime.textContent = data.checkout_time ?? '-';
             memberDate.textContent = data.date;
 
+            if (data.action === 'checkin') {
+
+                statusText.textContent = 'Check-in berhasil';
+
+                } else if (data.action === 'checkout') {
+
+                statusText.textContent = 'Check-out berhasil';
+
+                } else if (data.action === 'completed') {
+
+                statusText.textContent =
+                    'Check-in sudah dilakukan hari ini';
+                }
 
             // ==========================================
             // FOTO MEMBER

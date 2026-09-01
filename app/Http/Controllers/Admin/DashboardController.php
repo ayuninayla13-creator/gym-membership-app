@@ -321,24 +321,27 @@ class DashboardController extends Controller
 
         return response()->json([
             'exists' => true,
-
             'id' => $attendance->id,
-
-            'name' => $attendance->member?->user?->name ?? '-',
-
-            'member_code' => $attendance->member?->member_code ?? '-',
-
-            'uid' => $attendance->rfidCard?->uid ?? $uid,
-
+        
+            'name' => $attendance->member->user->name,
+            'member_code' => $attendance->member->member_code,
+            'uid' => $attendance->rfidCard->uid ?? '-',
+        
             'time' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('H:i:s')
                 : '-',
-
+        
+            'checkout_time' => $attendance->check_out_at
+                ? $attendance->check_out_at->format('H:i:s')
+                : null,
+        
             'date' => $attendance->check_in_at
                 ? $attendance->check_in_at->format('d M Y')
                 : '-',
-
-            'photo' => $photo,
+        
+            'action' => $attendance->check_out_at
+                ? 'checkout'
+                : 'checkin',
         ]);
     }
 }
