@@ -14,6 +14,7 @@ return new class extends Migration
             $table->foreignId('rfid_card_id')->nullable()->constrained()->nullOnDelete();
             $table->enum('method', ['rfid', 'manual'])->default('rfid');
             $table->timestamp('check_in_at');
+            $table->timestamp('check_out_at')->nullable();
             $table->timestamps();
         });
     }

@@ -308,6 +308,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const liveDot = document.getElementById('rfid-live-dot');
 
     let lastAttendanceId = null;
+    let lastCheckoutTime = null;
 
 
     async function checkLatestRfidCheckin() {
@@ -337,12 +338,14 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Kalau masih check-in yang sama,
             // tidak perlu render ulang.
-            if (lastAttendanceId === data.id) {
+            
+            if (lastAttendanceId === data.id ) {
                 return;
             }
 
 
             lastAttendanceId = data.id;
+            lastCheckoutTime = data.checkout_time;
 
 
             // ==========================================

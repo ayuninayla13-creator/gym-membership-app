@@ -13,137 +13,35 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        /*
-        |--------------------------------------------------------------------------
-        | STATISTIK DASHBOARD
-        |--------------------------------------------------------------------------
-        */
-
         $totalActive = Member::where('status', 'active')->count();
-
-        $newThisMonth = Member::whereMonth('join_date', now()->month)
-            ->whereYear('join_date', now()->year)
-            ->count();
-
+        $newThisMonth = Member::whereMonth('join_date', now()->month)->whereYear('join_date', now()->year)->count();
         $expiringSoon = Member::where('status', 'active')
             ->whereNotNull('expire_date')
-            ->whereBetween('expire_date', [
-                now(),
-                now()->addDays(7),
-            ])
+            ->whereBetween('expire_date', [now(), now()->addDays(7)])
             ->count();
+        $todayCheckins = Attendance::whereDate('check_in_at', today())->count();
 
-        $todayCheckins = Attendance::whereDate(
-            'check_in_at',
-            today()
-        )->count();
-
-        $revenueThisMonth = Payment::whereMonth(
-                'payment_date',
-                now()->month
-            )
-            ->whereYear(
-                'payment_date',
-                now()->year
-            )
+        $revenueThisMonth = Payment::whereMonth('payment_date', now()->month)
+            ->whereYear('payment_date', now()->year)
             ->where('status', 'paid')
             ->sum('amount');
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | KUNJUNGAN 7 HARI TERAKHIR
-        |--------------------------------------------------------------------------
-        */
-
         $attendanceLast7Days = collect(range(6, 0))->map(function ($daysAgo) {
-
             $date = now()->subDays($daysAgo);
-
             return [
                 'label' => $date->translatedFormat('D'),
-
-                'count' => Attendance::whereDate(
-                    'check_in_at',
-                    $date
-                )->count(),
+                'count' => Attendance::whereDate('check_in_at', $date)->count(),
             ];
         });
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | CHECK-IN TERBARU
-        |--------------------------------------------------------------------------
-        */
-
-        $recentCheckins = Attendance::with([
-                'member.user',
-                'rfidCard',
-            ])
-            ->latest('check_in_at')
-            ->limit(8)
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | MEMBER TERBARU
-        |--------------------------------------------------------------------------
-        */
-
-        $recentMembers = Member::with([
-                'user',
-                'package',
-            ])
-            ->latest('join_date')
-            ->limit(5)
-            ->get();
-
-
-        /*
-        |--------------------------------------------------------------------------
-        | DASHBOARD VIEW
-        |--------------------------------------------------------------------------
-        */
+        $recentCheckins = Attendance::with('member.user')->latest('check_in_at')->limit(8)->get();
+        $recentMembers = Member::with('user', 'package')->latest('join_date')->limit(5)->get();
 
         return view('admin.dashboard', compact(
-            'totalActive',
-            'newThisMonth',
-            'expiringSoon',
-            'todayCheckins',
-            'revenueThisMonth',
-            'attendanceLast7Days',
-            'recentCheckins',
-            'recentMembers'
+            'totalActive', 'newThisMonth', 'expiringSoon', 'todayCheckins',
+            'revenueThisMonth', 'attendanceLast7Days', 'recentCheckins', 'recentMembers'
         ));
     }
-
-
-    /**
-     * ========================================================================
-     * RFID CHECK-IN REALTIME
-     * ========================================================================
-     *
-     * Alur:
-     *
-     * scan_uids
-     *      ↓
-     * UID terbaru
-     *      ↓
-     * rfid_cards
-     *      ↓
-     * member
-     *      ↓
-     * cek status member
-     *      ↓
-     * cek sudah check-in hari ini atau belum
-     *      ↓
-     * buat attendance
-     *      ↓
-     * kirim data ke dashboard
-     *
-     */
     public function latestRfidCheckin()
     {
         /*
@@ -273,31 +171,14 @@ class DashboardController extends Controller
             ->latest('id')
             ->first();
 
-
-        /*
-        |--------------------------------------------------------------------------
-        | 8. BELUM CHECK-IN → BUAT ATTENDANCE BARU
-        |--------------------------------------------------------------------------
-        */
-
         if (!$attendance) {
-
-            $attendance = Attendance::create([
-                'member_id' => $member->id,
-                'rfid_card_id' => $card->id,
-                'method' => 'rfid',
-                'check_in_at' => now(),
-            ]);
-
-            
-
-            $attendance->load([
-                'member.user',
-                'rfidCard',
-            ]);
+            return response()->json([
+                'status'  => 'error',
+                'message' => 'Data presensi hari ini tidak ditemukan.'
+            ], 404);
         }
 
-
+            
         /*
         |--------------------------------------------------------------------------
         | 9. SIAPKAN FOTO MEMBER
