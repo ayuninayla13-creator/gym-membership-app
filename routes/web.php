@@ -6,7 +6,6 @@ use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\PackageController;
 use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RfidController;
-use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\WhatsappLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
@@ -70,15 +69,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
         '/dashboard/latest-rfid-checkin',
         [AdminDashboardController::class, 'latestRfidCheckin']
     )->name('dashboard.latest-rfid-checkin');
-
-    Route::prefix('reports')->name('reports.')->group(function () {
-        Route::get('/', [ReportController::class, 'index'])->name('index');
-        Route::get('/members/pdf', [ReportController::class, 'membersPdf'])->name('members.pdf');
-        Route::get('/attendance/pdf', [ReportController::class, 'attendancePdf'])->name('attendance.pdf');
-        Route::get('/revenue/pdf', [ReportController::class, 'revenuePdf'])->name('revenue.pdf');
-        Route::get('/expiring/pdf', [ReportController::class, 'expiringPdf'])->name('expiring.pdf');
-        Route::get('/whatsapp/pdf', [ReportController::class, 'whatsappPdf'])->name('whatsapp.pdf');
-    });
 });
 
 Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('member')->name('member.')->group(function () {

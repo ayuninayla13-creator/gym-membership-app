@@ -13,13 +13,16 @@ class MemberController extends Controller
 {
     public function store(Request $request)
     {
+        $request->validate([
+            'uid' => 'required|string|max:255',
+        ]);
+
         $checkUid = ScanUid::find(1);
 
         if (!$checkUid) {
-            $data = $request->validate([
-                'uid'  => 'required|string|max:255',
+            $checkUid = ScanUid::create([
+                'uid' => $request->uid,
             ]);
-            ScanUid::create($data);
         } else {
             $checkUid->update([
                 'uid' => $request->uid
@@ -34,20 +37,56 @@ class MemberController extends Controller
             ->where('uid', $uid)
             ->first();
 
+        // Kartu belum pernah didaftarkan, atau sudah didaftarkan tapi belum
+        // dihubungkan ke member manapun -> jangan buat attendance apa pun.
+        if (!$card || !$card->member) {
+            return response()->json([
+                'success' => false,
+                'reason' => 'unregistered',
+                'message' => 'Kartu belum terdaftar.',
+            ], 404);
+        }
+
         $member = $card->member;
 
-        $attendance = Attendance::with([
+        // Member ditemukan tapi statusnya bukan aktif (expired/inactive)
+        // -> jangan catat kehadiran.
+        if ($member->status !== 'active') {
+            return response()->json([
+                'success' => false,
+                'reason' => $member->status === 'expired' ? 'expired' : 'inactive',
+                'message' => $member->status === 'expired'
+                    ? 'Member sudah expired.'
+                    : 'Member tidak aktif.',
+                'member_code' => $member->member_code,
+            ], 403);
+        }
+
+        $openAttendance = Attendance::with([
             'member.user',
             'rfidCard',
         ])
             ->where('member_id', $member->id)
             ->where('rfid_card_id', $card->id)
             ->where('method', 'rfid')
-            ->whereDate('check_in_at', today())
+            ->whereNull('check_out_at')
             ->latest('id')
             ->first();
 
-        if (!$attendance) {
+        if ($openAttendance) {
+            // Ada sesi yang masih terbuka (belum checkout) -> tap ini = CHECK-OUT.
+            $openAttendance->update([
+                'check_out_at' => now(),
+            ]);
+
+            $attendance = $openAttendance->fresh([
+                'member.user',
+                'rfidCard',
+            ]);
+        } else {
+            // Tidak ada sesi terbuka -> tap ini = CHECK-IN baru.
+            // Tidak dibatasi tanggal, jadi member boleh checkin/checkout
+            // berkali-kali dalam sehari (misal pagi & sore).
             $attendance = Attendance::create([
                 'member_id' => $member->id,
                 'rfid_card_id' => $card->id,
@@ -58,13 +97,6 @@ class MemberController extends Controller
                 'member.user',
                 'rfidCard',
             ]);
-        } else {
-            $attendance = Attendance::find($attendance->id);
-            if (is_null($attendance->check_out_at)) {
-                $attendance->update([
-                    'check_out_at' => now() // Shortcut Laravel untuk Carbon::now()
-                ]);
-            }
         }
 
         return response()->json([
