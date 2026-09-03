@@ -192,6 +192,12 @@
                         'icon' => 'M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-6l-4 4v-4z'
                     ],
 
+                    [
+                        'route' => 'admin.reports.index',
+                        'label' => 'Laporan',
+                        'icon' => 'M9 17v-2a2 2 0 012-2h2a2 2 0 012 2v2m-9 4h14a1 1 0 001-1V4a1 1 0 00-1-1H6a1 1 0 00-1 1v16a1 1 0 001 1z'
+                    ],
+
                 ];
 
             @endphp

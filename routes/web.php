@@ -4,11 +4,13 @@ use App\Http\Controllers\Admin\AttendanceController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\MemberController;
 use App\Http\Controllers\Admin\PackageController;
+use App\Http\Controllers\Admin\ReportController;
 use App\Http\Controllers\Admin\RfidController;
 use App\Http\Controllers\Admin\WhatsappLogController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Member\DashboardController as MemberDashboardController;
 use App\Http\Controllers\Member\PasswordController as MemberPasswordController;
+use App\Http\Controllers\Member\PhotoController as MemberPhotoController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -32,6 +34,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/members', [MemberController::class, 'index'])->name('members.index');
     Route::get('/members/create', [MemberController::class, 'create'])->name('members.create');
     Route::post('/members', [MemberController::class, 'store'])->name('members.store');
+    Route::get('/members/{member}/photo', [MemberController::class, 'photo'])->name('members.photo');
     Route::get('/members/{member}/edit', [MemberController::class, 'edit'])->name('members.edit');
     Route::put('/members/{member}', [MemberController::class, 'update'])->name('members.update');
     Route::delete('/members/{member}', [MemberController::class, 'destroy'])->name('members.destroy');
@@ -53,6 +56,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
     Route::get('/whatsapp-logs', [WhatsappLogController::class, 'index'])->name('whatsapp.index');
 
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [ReportController::class, 'index'])->name('index');
+        Route::get('/members/pdf', [ReportController::class, 'membersPdf'])->name('members.pdf');
+        Route::get('/attendance/pdf', [ReportController::class, 'attendancePdf'])->name('attendance.pdf');
+        Route::get('/revenue/pdf', [ReportController::class, 'revenuePdf'])->name('revenue.pdf');
+        Route::get('/expiring/pdf', [ReportController::class, 'expiringPdf'])->name('expiring.pdf');
+        Route::get('/whatsapp/pdf', [ReportController::class, 'whatsappPdf'])->name('whatsapp.pdf');
+    });
+
     Route::get(
         '/dashboard/latest-rfid-checkin',
         [AdminDashboardController::class, 'latestRfidCheckin']
@@ -61,6 +73,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
 
 Route::middleware(['auth', 'role:member', 'force-password-change'])->prefix('member')->name('member.')->group(function () {
     Route::get('/dashboard', [MemberDashboardController::class, 'index'])->name('dashboard');
+    Route::get('/photo', [MemberPhotoController::class, 'show'])->name('photo.show');
+    Route::post('/photo', [MemberPhotoController::class, 'update'])->name('photo.update');
     Route::get('/password', [MemberPasswordController::class, 'edit'])->name('password.edit');
     Route::put('/password', [MemberPasswordController::class, 'update'])->name('password.update');
 });
@@ -71,5 +85,4 @@ Route::get('/members/latest-rfid', [MemberController::class, 'latestRfid'])
 Route::get('/admin/members/check-rfid', 
     [MemberController::class, 'checkRfid']
 )->name('admin.members.check-rfid');
-
 
