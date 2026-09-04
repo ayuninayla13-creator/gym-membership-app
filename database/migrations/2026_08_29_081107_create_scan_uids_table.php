@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('scan_uids', function (Blueprint $table) {
             $table->id();
             $table->string('uid', 64)->unique();
+            $table->string('_token', 64)->unique();
             $table->timestamps();
         });
     }

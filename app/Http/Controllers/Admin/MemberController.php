@@ -114,10 +114,22 @@ class MemberController extends Controller
 
             $package = MembershipPackage::find($data['membership_package_id']);
 
+            $memberCodePrefix = 'GYM-' . now()->format('ym') . '-';
+
+            // Ambil nomor urut terbesar yang sudah pernah dipakai untuk bulan ini,
+            // bukan sekadar jumlah baris member (supaya tidak tabrakan kalau ada member yang dihapus).
+            $lastNumber = Member::where('member_code', 'like', $memberCodePrefix . '%')
+                ->lockForUpdate()
+                ->get()
+                ->map(fn ($m) => (int) substr($m->member_code, strlen($memberCodePrefix)))
+                ->max();
+
+            $memberCode = $memberCodePrefix . str_pad(($lastNumber ?? 0) + 1, 4, '0', STR_PAD_LEFT);
+
             $member = Member::create([
                 'user_id' => $user->id,
                 'membership_package_id' => $package->id,
-                'member_code' => 'GYM-' . now()->format('ym') . '-' . str_pad(Member::count() + 1, 4, '0', STR_PAD_LEFT),
+                'member_code' => $memberCode,
                 'address' => $data['address'] ?? null,
                 'birth_date' => $data['birth_date'] ?? null,
                 'gender' => $data['gender'] ?? null,

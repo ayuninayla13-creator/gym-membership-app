@@ -6,5 +6,5 @@ use Illuminate\Database\Eloquent\Model;
 
 class Scan_UID extends Model
 {
-    protected $fillable = ['id', 'uid'];
+    protected $fillable = ['id', 'uid', '_token'];
 }
